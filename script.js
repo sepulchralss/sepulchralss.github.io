@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Плавний скрол до якорів (меню "Order")
+    // ===== ПЛАВНИЙ СКРОЛ =====
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
@@ -11,41 +11,63 @@ document.addEventListener('DOMContentLoaded', function() {
                     top: target.offsetTop - 80,
                     behavior: 'smooth'
                 });
-                // Lightbox functionality
-document.addEventListener('DOMContentLoaded', function() {
-    // Отримуємо модальне вікно
-    const modal = document.getElementById('imageModal');
-    const modalImg = document.getElementById('modalImage');
-    const captionText = document.getElementById('caption');
-    const closeBtn = document.getElementsByClassName('close')[0];
-
-    // Вибираємо всі зображення з класом .gallery-image (вони вже є в галереях)
-    const images = document.querySelectorAll('.gallery-image');
-
-    images.forEach(img => {
-        img.addEventListener('click', function(e) {
-            e.stopPropagation(); // щоб не спрацьовувало батьківське подія (якщо є)
-            modal.style.display = 'block';
-            modalImg.src = this.src;
-            captionText.innerHTML = this.alt || 'Image preview';
-        });
-    });
-
-    // Закриття при кліку на хрестик
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
-    }
-
-    // Закриття при кліку на фон (на саме модальне вікно)
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-});
             }
         });
     });
+
+    // ===== ЛАЙТБОКС (МОДАЛЬНЕ ВІКНО) =====
+    const modal = document.getElementById('imageModal');
+    if (!modal) {
+        console.error('Помилка: Не знайдено елемент #imageModal. Додайте його в HTML перед </body>');
+        return;
+    }
+    const modalImg = document.getElementById('modalImage');
+    const captionText = document.getElementById('caption');
+    const closeBtn = document.querySelector('.close');
+
+    // Функція відкриття
+    function openModal(src, alt) {
+        modal.style.display = 'block';
+        modalImg.src = src;
+        captionText.textContent = alt || '';
+        // Забороняємо прокрутку фону
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Функція закриття
+    function closeModal() {
+        modal.style.display = 'none';
+        modalImg.src = '';
+        document.body.style.overflow = '';
+    }
+
+    // Закриття по хрестику
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
+    // Закриття по кліку на фон
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
+    // Закриття по клавіші Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'block') {
+            closeModal();
+        }
+    });
+
+    // Знаходимо всі зображення, які мають клас .gallery-image
+    const images = document.querySelectorAll('.gallery-image');
+    if (images.length === 0) {
+        console.warn('Не знайдено жодного зображення з класом .gallery-image. Переконайтеся, що вони є у вашому HTML.');
+    } else {
+        images.forEach(img => {
+            img.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openModal(this.src, this.alt);
+            });
+            // Додаємо курсор-руку, щоб показати, що зображення клікабельне
+            img.style.cursor = 'pointer';
+        });
+    }
 });
